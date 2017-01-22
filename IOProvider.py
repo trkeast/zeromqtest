@@ -1,4 +1,5 @@
 import curses
+from collections import namedtuple
 
 class IOProvider:
     """
@@ -8,14 +9,19 @@ class IOProvider:
 
     def __init__(self):
         self.stdscr = curses.initscr()
-        self.stdscr.clear()
-        self.inputPromptPosition = (0, 0)
-        self.outputPosition = (1, 0)
+        Point = namedtuple('Point', "y x")
+        self.windowSize = Point(*self.stdscr.getmaxyx())
+        self.inputPromptPosition = Point(self.windowSize.y - 1, 0)
+        self.outputPosition = Point(self.windowSize.y - 2, 0)
+        self.stdscr.scrollok(True)
+        self.stdscr.setscrreg(0, self.outputPosition.y)
 
     def __raw_input(self, row, column, prompt_string):
         # non blocking input function for read string from stdin
         curses.echo()
         self.stdscr.nodelay(1)
+        self.stdscr.clrtoeol()
+        self.stdscr.refresh()
         self.stdscr.addstr(row, column, prompt_string)
         result = []
         key = None
@@ -32,14 +38,15 @@ class IOProvider:
         """
             Print values in args to console
         """
-        y, x = self.stdscr.getyx()  # workaround - save original cursor position for restore in future
-        self.stdscr.refresh()
         valstring = " ".join(args)
-        self.stdscr.addstr(self.outputPosition[0], self.outputPosition[1], valstring)
+        y, x = self.stdscr.getyx()  # workaround - save original cursor position for restore in future
+        valstring = " ".join(args)
+        self.stdscr.addstr(self.outputPosition.y, self.outputPosition.x, valstring)
+        self.stdscr.scroll(1)
         self.stdscr.move(y, x)  # workaround - return input cursor to original position
 
     def read(self, prompt):
         """
             Read value string from stdin
         """
-        return self.__raw_input(self.inputPromptPosition[0], self.inputPromptPosition[1], prompt)
+        return self.__raw_input(self.inputPromptPosition.y, self.inputPromptPosition.x, prompt)

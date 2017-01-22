@@ -21,7 +21,6 @@ class Client:
             :param message: Message to send
         """
         context = zmq.Context()
-        self.ioprovider.write("Connecting to server %s" % self.url)
         socket = context.socket(zmq.REQ)
         socket.connect(self.url)
         socket.send(message)

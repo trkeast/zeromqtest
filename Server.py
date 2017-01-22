@@ -28,7 +28,7 @@ class Server(threading.Thread):
         with socket:
             while self.isRunning():
                 message = socket.recv()  # receive message from socket
-                self.ioprovider.write("Received request: %s" % message)  # print message
+                self.ioprovider.write("Received message: %s" % message)  # print message
                 socket.send("received")  # send ack
 
     # stop server thread via

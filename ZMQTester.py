@@ -49,8 +49,8 @@ class ZMQTester:
         self.processing = True
         while self.processing:
             message = self.ioprovider.read(
-                'Enter message for sending to "%s":' % self.clientUrl).lower()  # read message from stdin
-            cmd = self.commands.get(message)  # try detect command
+                'Enter message for sending to "%s":' % self.clientUrl)  # read message from stdin
+            cmd = self.commands.get(message.lower())  # try detect command
             if not cmd:
                 self.client.send(message)  # if not detects - send message
             else:
